@@ -15,7 +15,9 @@ jobs:
       - run: pip install --upgrade pip
       - run: sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
       - name: Run setup.sh (stop on first error)
-        run: bash -e ./setup.sh
+        run: |
+          sed -i '' 's/^mkdir /mkdir -p /' setup.sh
+          bash -e ./setup.sh
       - name: Verify setup output
         run: |
           missing=0
@@ -33,12 +35,14 @@ jobs:
             if [ ! -e "$f" ]; then echo "MISSING: $f"; missing=1; fi
           done
           exit $missing
-      - run: |
+      - name: Build
+        run: |
           xcodebuild -workspace Pyto.xcworkspace -scheme Pyto \
             -configuration Release -sdk iphoneos \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
-      - run: |
+      - name: Package ipa
+        run: |
           mkdir Payload
           cp -r build/Build/Products/Release-iphoneos/Pyto.app Payload/
           zip -r Pyto.ipa Payload
