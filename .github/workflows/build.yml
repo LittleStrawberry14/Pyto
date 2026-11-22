@@ -20,6 +20,13 @@ jobs:
           sed -i '' 's/^mkdir /mkdir -p /' setup.sh
           sed -i '' 's#tar -xzvf Python-3.10-iOS-support.b1.tar.gz#tar -xzvf ../Python-3.10-iOS-support.b1.tar.gz#' setup.sh
           bash -e ./setup.sh
+      - name: Download ssh_cmd (missing from setup.sh)
+        run: |
+          cd Extensions/Dependencies/ios_system
+          curl -fL -O https://github.com/holzschu/ios_system/releases/download/v3.0.0/ssh_cmd.xcframework.zip \
+            || curl -fL -O https://github.com/holzschu/ios_system/releases/download/v3.0.2/ssh_cmd.xcframework.zip
+          unzip -q ssh_cmd.xcframework.zip
+          rm ssh_cmd.xcframework.zip
       - name: Verify setup output
         run: |
           missing=0
@@ -32,6 +39,7 @@ jobs:
             Extensions/SciPy/scipy-deps.framework \
             Extensions/Dependencies/ios_system/awk.xcframework \
             Extensions/Dependencies/ios_system/shell.xcframework \
+            Extensions/Dependencies/ios_system/ssh_cmd.xcframework \
             Extensions/Dependencies/libssh2/libssh2.a
           do
             if [ ! -e "$f" ]; then echo "MISSING: $f"; missing=1; fi
@@ -40,7 +48,8 @@ jobs:
       - name: Build
         run: |
           xcodebuild -workspace Pyto.xcworkspace -scheme Pyto \
-            -configuration Release -sdk iphoneos \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
       - name: Package ipa
