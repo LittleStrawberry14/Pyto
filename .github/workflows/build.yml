@@ -14,7 +14,25 @@ jobs:
           allow-prereleases: true
       - run: pip install --upgrade pip
       - run: sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
-      - run: ./setup.sh
+      - name: Run setup.sh (stop on first error)
+        run: bash -e ./setup.sh
+      - name: Verify setup output
+        run: |
+          missing=0
+          for f in \
+            python3_ios/Python3_ios/libPython3.10.a \
+            python3_ios/Python3_ios/libOpenSSL.a \
+            python3_ios/Python3_ios/libFFI.a \
+            opencv2.framework \
+            Extensions/OpenBlas/openblas.framework \
+            Extensions/SciPy/scipy-deps.framework \
+            Extensions/Dependencies/ios_system/awk.xcframework \
+            Extensions/Dependencies/ios_system/shell.xcframework \
+            Extensions/Dependencies/libssh2/libssh2.a
+          do
+            if [ ! -e "$f" ]; then echo "MISSING: $f"; missing=1; fi
+          done
+          exit $missing
       - run: |
           xcodebuild -workspace Pyto.xcworkspace -scheme Pyto \
             -configuration Release -sdk iphoneos \
