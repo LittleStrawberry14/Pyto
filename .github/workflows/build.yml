@@ -13,6 +13,7 @@ jobs:
           python-version: "3.10"
           allow-prereleases: true
       - run: pip install --upgrade pip
+      - run: pip install pillow
       - run: sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
       - name: Run setup.sh (stop on first error)
         run: |
