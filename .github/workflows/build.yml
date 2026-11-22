@@ -17,6 +17,7 @@ jobs:
       - name: Run setup.sh (stop on first error)
         run: |
           sed -i '' 's/^mkdir /mkdir -p /' setup.sh
+          sed -i '' 's#tar -xzvf Python-3.10-iOS-support.b1.tar.gz#tar -xzvf ../Python-3.10-iOS-support.b1.tar.gz#' setup.sh
           bash -e ./setup.sh
       - name: Verify setup output
         run: |
