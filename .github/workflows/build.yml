@@ -1,11 +1,8 @@
-# https://docs.github.com/en/actions/use-cases-and-examples/deploying/installing-an-apple-certificate-on-macos-runners-for-xcode-development
-
 name: build
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - main
-  pull_request:
+    branches: [main]
 jobs:
   build:
     runs-on: macos-latest
@@ -18,4 +15,16 @@ jobs:
       - run: pip install --upgrade pip
       - run: sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
       - run: ./setup.sh
-      - run: xcodebuild -workspace Pyto.xcworkspace -scheme Pyto -configuration Release
+      - run: |
+          xcodebuild -workspace Pyto.xcworkspace -scheme Pyto \
+            -configuration Release -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+      - run: |
+          mkdir Payload
+          cp -r build/Build/Products/Release-iphoneos/Pyto.app Payload/
+          zip -r Pyto.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Pyto-ipa
+          path: Pyto.ipa
