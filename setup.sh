@@ -45,8 +45,22 @@ curl -L -O https://github.com/holzschu/network_ios/releases/download/v0.2/networ
 curl -L -O https://github.com/holzschu/ios_system/releases/download/v3.0.0/tar.xcframework.zip
 curl -L -O https://github.com/holzschu/ios_system/releases/download/v3.0.0/tar.xcframework.zip
 curl -L -O https://github.com/holzschu/ios_system/releases/download/v3.0.0/text.xcframework.zip
+curl -L -O https://github.com/holzschu/llvm/releases/download/1.0/libLLVM.xcframework.zip
+curl -L -O https://github.com/holzschu/llvm/releases/download/1.0/clang.xcframework.zip
+curl -L -O https://github.com/holzschu/llvm/releases/download/1.0/lli.xcframework.zip
+curl -L -O https://github.com/holzschu/llvm/releases/download/1.0/link.xcframework.zip
+curl -L -O https://github.com/holzschu/ios_system/releases/download/v3.0.0/ios_system.xcframework.zip
 find . -name "*.zip" -exec unzip {} \;
 rm *.zip
+
+# The Xcode project links plain .framework bundles for LLVM / ios_system
+# (libLLVM, clang, lli, link, ios_system). Take their device slices out of
+# the xcframeworks downloaded above.
+for fw in libLLVM clang lli link ios_system; do
+  rm -rf "$fw.framework"
+  cp -r "$fw.xcframework/ios-arm64/$fw.framework" "$fw.framework"
+  rm -rf "$fw.xcframework"
+done
 popd
 
 pushd Extensions/Dependencies/libssh2
